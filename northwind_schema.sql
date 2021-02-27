@@ -1,8 +1,13 @@
---Create tables for demo data using northwind sample database.
---Adapted from https://raw.githubusercontent.com/YugaByte/yugabyte-db/master/sample/northwind_ddl.sql
---- 
+---Create tables for demo data using northwind sample database.
+---Adapted from https://raw.githubusercontent.com/YugaByte/yugabyte-db/master/sample/northwind_ddl.sql
+--
 
 USE DATABASE DEMO_DB;
+
+---
+--- drop tables
+---
+
 
 DROP TABLE IF EXISTS customer_customer_demo;
 DROP TABLE IF EXISTS customer_demographics;
@@ -27,7 +32,7 @@ CREATE TABLE categories (
     category_id smallint NOT NULL PRIMARY KEY,
     category_name character varying(15) NOT NULL,
     description text,
-    picture text
+    picture char
 );
 
 
@@ -36,7 +41,7 @@ CREATE TABLE categories (
 --
 
 CREATE TABLE customer_demographics (
-    customer_type_id char NOT NULL PRIMARY KEY,
+    customer_type_id varchar NOT NULL PRIMARY KEY,
     customer_desc text
 );
 
@@ -46,7 +51,7 @@ CREATE TABLE customer_demographics (
 --
 
 CREATE TABLE customers (
-    customer_id char NOT NULL PRIMARY KEY,
+    customer_id varchar NOT NULL PRIMARY KEY,
     company_name character varying(40) NOT NULL,
     contact_name character varying(30),
     contact_title character varying(30),
@@ -64,8 +69,8 @@ CREATE TABLE customers (
 --
 
 CREATE TABLE customer_customer_demo (
-    customer_id char NOT NULL,
-    customer_type_id char NOT NULL,
+    customer_id varchar NOT NULL,
+    customer_type_id varchar NOT NULL,
     PRIMARY KEY (customer_id, customer_type_id),
     FOREIGN KEY (customer_type_id) REFERENCES customer_demographics,
     FOREIGN KEY (customer_id) REFERENCES customers
@@ -90,8 +95,8 @@ CREATE TABLE employees (
     country character varying(15),
     home_phone character varying(24),
     extension character varying(4),
-    photo text,
-    notes text,
+    photo char,
+    notes varchar,
     reports_to smallint,
     photo_path character varying(255),
 	FOREIGN KEY (reports_to) REFERENCES employees
@@ -114,7 +119,7 @@ CREATE TABLE suppliers (
     country character varying(15),
     phone character varying(24),
     fax character varying(24),
-    homepage text
+    homepage varchar
 );
 
 
@@ -144,7 +149,7 @@ CREATE TABLE products (
 
 CREATE TABLE region (
     region_id smallint NOT NULL PRIMARY KEY,
-    region_description char NOT NULL
+    region_description varchar NOT NULL
 );
 
 
@@ -165,7 +170,7 @@ CREATE TABLE shippers (
 
 CREATE TABLE orders (
     order_id smallint NOT NULL PRIMARY KEY,
-    customer_id char,
+    customer_id varchar,
     employee_id smallint,
     order_date date,
     required_date date,
@@ -190,7 +195,7 @@ CREATE TABLE orders (
 
 CREATE TABLE territories (
     territory_id character varying(20) NOT NULL PRIMARY KEY,
-    territory_description char NOT NULL,
+    territory_description varchar NOT NULL,
     region_id smallint NOT NULL,
 	FOREIGN KEY (region_id) REFERENCES region
 );

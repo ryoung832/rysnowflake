@@ -1,5 +1,5 @@
 --Create tables for demo data using northwind sample database.
-
+--Adapted from https://raw.githubusercontent.com/YugaByte/yugabyte-db/master/sample/northwind_ddl.sql
 --- drop tables
 ---
 

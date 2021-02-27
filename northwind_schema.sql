@@ -1,8 +1,8 @@
 --Create tables for demo data using northwind sample database.
 --Adapted from https://raw.githubusercontent.com/YugaByte/yugabyte-db/master/sample/northwind_ddl.sql
---- drop tables
----
+--- 
 
+USE DATABASE DEMO_DB;
 
 DROP TABLE IF EXISTS customer_customer_demo;
 DROP TABLE IF EXISTS customer_demographics;

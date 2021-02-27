@@ -11,10 +11,10 @@ grant operate on warehouse compute_wh to role datascientist;
 grant operate on warehouse compute_wh to role cust_datascientist;
 
 --grant role to users
-grant role datascientist to user ryashpool;
-grant role analyst to user ryashpool;
-grant role cust_datascientist to user ryashpool;
-grant role cust_analyst to user ryashpool;
+grant role datascientist to user ry*******;
+grant role analyst to user ry*******;
+grant role cust_datascientist to user ry*******;
+grant role cust_analyst to user ry*******;
 
 --create a view
 select * from customers;

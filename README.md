@@ -2,9 +2,11 @@
 Case Study
 
 A snowflake adaptation of the northwind database used as sample data for this case study
-These require a database to be already existing DEMO_DB
+These files may require editing to use an appropriate database TEST_DB or DEMO_DB
 
-Northwind_schema.sql
+These two files create some sample data
+1.Northwind_schema.sql
+2.Northwind_data.sql
 
-Northwind_data.sql
+
 

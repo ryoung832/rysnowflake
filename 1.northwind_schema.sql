@@ -1,13 +1,16 @@
+USE ROLE ACCOUNTADMIN;
+CREATE DATABASE IF NOT EXISTS TEST_DB;
+
 ---Create tables for demo data using northwind sample database.
 ---Adapted from https://raw.githubusercontent.com/YugaByte/yugabyte-db/master/sample/northwind_ddl.sql
 --
+USE ROLE ACCOUNTADMIN;
+USE DATABASE TEST_DB;
+USE WAREHOUSE COMPUTE_WH;
 
-USE DATABASE DEMO_DB;
-
+---Drop tables if they already exist
+--- 
 ---
---- drop tables
----
-
 
 DROP TABLE IF EXISTS customer_customer_demo;
 DROP TABLE IF EXISTS customer_demographics;

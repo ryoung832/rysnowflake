@@ -1,0 +1,121 @@
+--This worksheet demonstrates the use of secure views to control access to data
+--Use the test database created in prior steps
+USE ROLE ACCOUNTADMIN;
+USE TEST_DB;
+USE WAREHOUSE COMPUTE_WH;
+
+--Create some new security roles that represent differnet user scenarios
+--No access to PII
+CREATE ROLE IF NOT EXISTS DATASCIENTIST COMMENT = 'No access to customer identifying data';
+CREATE ROLE IF NOT EXISTS ANALYST COMMENT = 'No access to customer identifying data';
+--Authorised access to PII
+CREATE ROLE IF NOT EXISTS CUST_DATASCIENTIST COMMENT = 'Authorised to view customer identifying data';
+CREATE ROLE IF NOT EXISTS CUST_ANALYST COMMENT = 'Authorised to view customer identifying data';
+
+--Allow roles to use compute
+GRANT OPERATE ON WAREHOUSE COMPUTE_WH to ROLE DATASCIENTIST;
+GRANT OPERATE ON WAREHOUSE COMPUTE_WH to ROLE ANALYST;
+GRANT OPERATE ON WAREHOUSE COMPUTE_WH to ROLE CUST_DATASCIENTIST;
+GRANT OPERATE ON WAREHOUSE COMPUTE_WH to ROLE CUST_ANALYST;
+
+--Assign role to a user user
+--This is hardcoded to myself so will need to be updated to other users 
+GRANT ROLE DATASCIENTIST TO USER RYASHPOOL;
+GRANT ROLE ANALYST TO USER RYASHPOOL;
+GRANT ROLE CUST_DATASCIENTIST TO USER RYASHPOOL;
+GRANT ROLE CUST_ANALYST TO USER RYASHPOOL;
+
+--Create a view and a secure view that limits column and row access
+SELECT * FROM CUSTOMERS;
+--91 RECORDS
+DROP VIEW IF EXISTS NOPII_CUSTOMERS;
+CREATE VIEW IF NOT EXISTS NOPII_CUSTOMERS COMMENT = 'No access to customer identifying data' AS
+    SELECT CITY, REGION, POSTAL_CODE, COUNTRY
+        FROM CUSTOMERS
+        WHERE CITY<>'Berlin';
+
+DROP VIEW IF EXISTS SV_NOPII_CUSTOMERS;
+CREATE SECURE VIEW IF NOT EXISTS SV_NOPII_CUSTOMERS COMMENT = 'No access to customer identifying data' AS
+    SELECT CITY, REGION, POSTAL_CODE, COUNTRY
+        FROM CUSTOMERS
+        WHERE CITY<>'Berlin';
+
+--Map privilages to roles for cust_analyst and analyst
+GRANT SELECT ON TABLE CUSTOMERS TO CUST_ANALYST;
+GRANT SELECT ON VIEW NOPII_CUSTOMERS TO CUST_ANALYST;
+GRANT SELECT ON VIEW SV_NOPII_CUSTOMERS TO CUST_ANALYST;
+
+GRANT SELECT ON VIEW NOPII_CUSTOMERS TO ANALYST;
+GRANT SELECT ON VIEW SV_NOPII_CUSTOMERS TO ANALYST;
+
+GRANT USAGE, MONITOR ON DATABASE TEST_DB TO CUST_ANALYST;
+GRANT USAGE, MONITOR ON DATABASE TEST_DB TO ANALYST;
+GRANT USAGE, MONITOR ON ALL SCHEMAS IN DATABASE TEST_DB TO ANALYST;
+GRANT USAGE, MONITOR ON ALL SCHEMAS IN DATABASE TEST_DB TO CUST_ANALYST;
+
+
+--Switch role to cust_analyst
+--Demonstrate that all three queries should execute correctly
+USE ROLE CUST_ANALYST;
+USE TEST_DB;
+USE WAREHOUSE COMPUTE_WH;
+
+SELECT * FROM CUSTOMERS;
+SELECT * FROM NOPII_CUSTOMERS;
+SELECT * FROM SV_NOPII_CUSTOMERS;
+
+
+--Switch role to analyst
+--Demonstrate that only the views should execute correctly
+USE ROLE ANALYST;
+USE TEST_DB;
+USE WAREHOUSE COMPUTE_WH;
+
+SELECT * FROM CUSTOMERS;
+SELECT * FROM NOPII_CUSTOMERS;
+SELECT * FROM SV_NOPII_CUSTOMERS;
+
+--Views may not be as secure eg this example from snowflake a leaky error may occur depending on optimiser behavior
+SELECT * 
+    FROM NOPII_CUSTOMERS
+    WHERE 1/IFF(CITY = 'Berlin',0,1)= 1;
+    
+--Secure views exist to remove some of those optimiser functions at the cost of some performance
+--A view will show query used.
+SHOW VIEWS LIKE 'NOPII_CUSTOMERS';
+--A secure view will no. 
+SHOW VIEWS LIKE 'SV_NOPII_CUSTOMERS';
+
+--Row level access controls can be implemented using a access rules table
+USE ROLE ACCOUNTADMIN;
+USE TEST_DB;
+USE WAREHOUSE COMPUTE_WH;
+
+CREATE TABLE IF NOT EXISTS CUSTOMER_ACCESS_RULES (
+    CITY CHARACTER VARYING(15),
+    ROLE_NAME VARCHAR
+);
+
+TRUNCATE CUSTOMER_ACCESS_RULES;
+INSERT INTO CUSTOMER_ACCESS_RULES VALUES('Berlin','analyst');
+SELECT * FROM CUSTOMER_ACCESS_RULES;
+
+CREATE SECURE VIEW AR_SV_NOPII_CUSTOMERS COMMENT = 'No access to customer identifying data' AS
+    SELECT C.CITY, C.REGION, C.POSTAL_CODE, C.COUNTRY
+    FROM CUSTOMERS C 
+    WHERE C.CITY NOT IN 
+        (SELECT CAR.CITY FROM CUSTOMER_ACCESS_RULES CAR
+        WHERE UPPER(CAR.ROLE_NAME) = CURRENT_ROLE());
+        
+GRANT SELECT ON VIEW AR_SV_NOPII_CUSTOMERS TO ANALYST;
+
+--Demonstrate analyst access via access rule table
+USE ROLE ANALYST;
+USE TEST_DB;
+USE WAREHOUSE COMPUTE_WH;
+
+SELECT * FROM CUSTOMERS;
+SELECT * FROM NOPII_CUSTOMERS;
+SELECT * FROM SV_NOPII_CUSTOMERS;
+SELECT * FROM AR_SV_NOPII_CUSTOMERS;
+

@@ -11,4 +11,6 @@ You will need access to the Snowflake accountadmin role to demonstrate all featu
 
 3.secureviews.sql - demonstrate security through the use of views, secuire views and access control tables
 
+4.masking.sql - demonstrate masking polcies
+
 

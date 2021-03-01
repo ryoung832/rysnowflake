@@ -6,9 +6,9 @@ These files may require editing to use an appropriate database TEST_DB or DEMO_D
 
 These two files create some sample data
 
-1.Northwind_schema.sql - create the db tables
+1.northwind_schema.sql - create the db tables
 
-2.Northwind_data.sql - populate some sample data
+2.northwind_data.sql - populate some sample data
 
 3.secureviews.sql - demonstrate security through the use of views, secuire views and access control tables
 

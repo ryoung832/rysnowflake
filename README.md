@@ -13,4 +13,6 @@ You will need access to the Snowflake accountadmin role to demonstrate all featu
 
 4.masking.sql - demonstrate masking polcies
 
+5.metadata.sql - create audit history example
+
 
